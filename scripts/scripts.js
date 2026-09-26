@@ -12,6 +12,38 @@ import {
   buildBlock,
 } from './aem.js';
 
+/**
+ * Moves selected attributes from one element to another.
+ * @param {Element} from source element
+ * @param {Element} to destination element
+ * @param {string[]} [attributes] attributes to move
+ */
+export function moveAttributes(from, to, attributes) {
+  const attributeNames = attributes || [...from.attributes].map(({ nodeName }) => nodeName);
+  attributeNames.forEach((attribute) => {
+    const value = from.getAttribute(attribute);
+    if (value) {
+      to?.setAttribute(attribute, value);
+      from.removeAttribute(attribute);
+    }
+  });
+}
+
+/**
+ * Moves Universal Editor instrumentation to a replacement element.
+ * @param {Element} from source element
+ * @param {Element} to destination element
+ */
+export function moveInstrumentation(from, to) {
+  moveAttributes(
+    from,
+    to,
+    [...from.attributes]
+      .map(({ nodeName }) => nodeName)
+      .filter((attribute) => attribute.startsWith('data-aue-') || attribute.startsWith('data-richtext-')),
+  );
+}
+
 if (window.trustedTypes && window.trustedTypes.createPolicy) {
   const innerTT = window.trustedTypes.createPolicy('tt-inner', {
     createHTML: (s) => s, // avoid stack overflow
